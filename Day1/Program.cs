@@ -10,7 +10,6 @@ namespace Day1
         {
 
             var filePath = "../../../input.txt";
-            //var filePath = "../../../input-basic.txt";
             if (!File.Exists(filePath))
             {
                 Console.WriteLine($"File does not exist!");
