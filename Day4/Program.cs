@@ -15,7 +15,7 @@
 
         foreach (var line in lines)
         {
-            var (first, second) = Day3.ParseLine(line); ;
+            var (first, second) = Day4.ParseLine(line); ;
             var pair = new AssignmentPair(AssignedSection.Parse(first), AssignedSection.Parse(second), line);
             if (pair.FullyOverlappes())
             {
@@ -38,7 +38,7 @@ record AssignedSection(int From, int To)
 {
     internal static AssignedSection Parse(string section)
     {
-        var (from, to) = Day3.ParseSection(section);
+        var (from, to) = Day4.ParseSection(section);
         return new AssignedSection(from, to);
     }
 
@@ -69,7 +69,7 @@ record AssignmentPair(AssignedSection First, AssignedSection Second, string Inpu
     internal bool Overlappes() => First.Overlappes(Second);
 }
 
-internal static class Day3
+internal static class Day4
 {
     internal static (string first, string second) ParseLine(string input)
     {
