@@ -140,27 +140,33 @@ class RopeBridge
         var previousHeadPosition = Head;
         Head = Head.MoveOne(direction);
 
-        if (Tails.Count < TailLength)
+        if (!Tails.Any())
         {
             Tails.Add(previousHeadPosition);
         }
-
-        if (!Head.IsAdjacent(Tails[^1]) || previousHeadPosition == Tails[^1])
+        else if (Tails.Count != TailLength)
         {
-            Tails[^1] = Tails[^1].Follow(Head);
+            Tails.Add(Tails[^1]);
+        }
+
+        if (!Head.IsAdjacent(Tails[0]) || previousHeadPosition == Tails[0])
+        {
             if (Tails.Count == TailLength)
             {
-                TailEndPositions.Add(Tails[0]);
-                for (int i = Tails.Count - 2; i >= 0; i--)
-                {
-                    Tails[i] = Tails[i].Follow(Tails[i+1]);
-                }
+                TailEndPositions.Add(Tails[^1]);
             }
-            Moves.Add(direction);
+            Tails[0] = Tails[0].Follow(Head);
+            for (int i = 1; i <= Tails.Count - 2; i++)
+            {        
+                // Follow nějak špatně funguje, když se plní itemy tak itemy na sebe nenavazují.
+                Tails[i] = Tails[i].Follow(Tails[i - 1]);
+            }
         }
+        Moves.Add(direction);
     }
-
 }
+
+
 
 internal static class Extensions
 {
