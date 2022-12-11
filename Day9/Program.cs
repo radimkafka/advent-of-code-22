@@ -1,23 +1,26 @@
-﻿internal class Program
+﻿using System.Net.Http.Headers;
+
+internal class Program
 {
     private static void Main(string[] args)
     {
-        var filePath = "../../../input.txt";
+        //var filePath = "../../../input.txt";
         //var filePath = "../../../input.basic.txt";
+        var filePath = "../../../input.basic2.txt";
         if (!File.Exists(filePath))
         {
             Console.WriteLine($"File does not exist!");
             return;
         }
         var input = File.ReadAllLines(filePath);
-        var bridge = new RopeBridge();
+        var bridge = new RopeBridge() { TailLength = 1 };
         foreach (var line in input)
         {
             Move? move = Move.Parse(line);
             bridge.MakeMove(move);
         }
 
-        Console.WriteLine($"Tail visited: {bridge.TailPositions.Distinct().Count()} positions");
+        Console.WriteLine($"Tail visited: {bridge.TailEndPositions.Distinct().Count()} positions");
         Console.ReadLine();
     }
 }
@@ -110,11 +113,13 @@ internal record Position(int X, int Y)
 
 class RopeBridge
 {
-    private Position Head { get; set; } = new(0, 0);
+    public required int TailLength { get; init; }
 
-    private Position Tail { get; set; } = new(0, 0);
+    public Position Head { get; private set; } = new(0, 0);
 
-    public List<Position> TailPositions { get; } = new();
+    public List<Position> Tails { get; private set; } = new List<Position>();
+
+    public List<Position> TailEndPositions { get; } = new();
 
     public List<Direction> Moves { get; } = new();
 
@@ -130,10 +135,24 @@ class RopeBridge
     {
         var previousHeadPosition = Head;
         Head = Head.MoveOne(direction);
-        if (!Head.IsAdjacent(Tail) || previousHeadPosition == Tail)
+
+        if (Tails.Count < TailLength)
         {
-            Tail = Tail.Follow(Head);
-            TailPositions.Add(Tail);
+            Tails.Add(previousHeadPosition);
+        }
+        if (!Head.IsAdjacent(Tails[^1]) || previousHeadPosition == Tails[^1])
+        {
+            Tails[^1] = Tails[^1].Follow(Head);
+
+            TailEndPositions.Add(Tails[0]);
+            Tails[0] = Tails[0].Follow(Tails[^1]);
+            for (int i = 1; i < Tails.Count; i++)
+            {
+                Tails[i] = Tails[i].Follow(Tails[^i]);
+            }
+
+
+
             Moves.Add(direction);
         }
     }
