@@ -4,8 +4,8 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        Run("../../../input.txt", 1);
-        Run("../../../input.basic.txt", 1);
+        //Run("../../../input.txt", 1);
+        //Run("../../../input.basic.txt", 1);
         Run("../../../input.basic2.txt", 10);
         Console.ReadLine();
     }
@@ -148,12 +148,13 @@ class RopeBridge
         if (!Head.IsAdjacent(Tails[^1]) || previousHeadPosition == Tails[^1])
         {
             Tails[^1] = Tails[^1].Follow(Head);
-            if (Tails.Count == TailLength) TailEndPositions.Add(Tails[0]);
-
-            Tails[0] = Tails[0].Follow(Tails[^1]);
-            for (int i = 1; i < Tails.Count; i++)
+            if (Tails.Count == TailLength)
             {
-                Tails[i] = Tails[i].Follow(Tails[^(i + 1)]);
+                TailEndPositions.Add(Tails[0]);
+                for (int i = Tails.Count - 2; i >= 0; i--)
+                {
+                    Tails[i] = Tails[i].Follow(Tails[i+1]);
+                }
             }
             Moves.Add(direction);
         }
