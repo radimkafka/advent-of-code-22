@@ -4,16 +4,21 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        //var filePath = "../../../input.txt";
-        //var filePath = "../../../input.basic.txt";
-        var filePath = "../../../input.basic2.txt";
+        Run("../../../input.txt", 1);
+        Run("../../../input.basic.txt", 1);
+        Run("../../../input.basic2.txt", 10);
+        Console.ReadLine();
+    }
+
+    private static void Run(string filePath, int tailLength)
+    {
         if (!File.Exists(filePath))
         {
             Console.WriteLine($"File does not exist!");
             return;
         }
         var input = File.ReadAllLines(filePath);
-        var bridge = new RopeBridge() { TailLength = 1 };
+        var bridge = new RopeBridge() { TailLength = tailLength };
         foreach (var line in input)
         {
             Move? move = Move.Parse(line);
@@ -21,7 +26,6 @@ internal class Program
         }
 
         Console.WriteLine($"Tail visited: {bridge.TailEndPositions.Distinct().Count()} positions");
-        Console.ReadLine();
     }
 }
 
@@ -140,19 +144,17 @@ class RopeBridge
         {
             Tails.Add(previousHeadPosition);
         }
+
         if (!Head.IsAdjacent(Tails[^1]) || previousHeadPosition == Tails[^1])
         {
             Tails[^1] = Tails[^1].Follow(Head);
+            if (Tails.Count == TailLength) TailEndPositions.Add(Tails[0]);
 
-            TailEndPositions.Add(Tails[0]);
             Tails[0] = Tails[0].Follow(Tails[^1]);
             for (int i = 1; i < Tails.Count; i++)
             {
-                Tails[i] = Tails[i].Follow(Tails[^i]);
+                Tails[i] = Tails[i].Follow(Tails[^(i + 1)]);
             }
-
-
-
             Moves.Add(direction);
         }
     }
