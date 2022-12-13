@@ -4,9 +4,10 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        //Run("../../../input.txt", 1);
-        //Run("../../../input.basic.txt", 1);
-        Run("../../../input.basic2.txt", 10);
+        //Run("../../../input.txt", 1); // 6018
+        //Run("../../../input.basic.txt", 1); // 13
+        Run("../../../input.txt", 9); //1
+        //Run("../../../input.basic2.txt", 9);
         Console.ReadLine();
     }
 
@@ -23,8 +24,9 @@ internal class Program
         {
             Move? move = Move.Parse(line);
             bridge.MakeMove(move);
+            //var str = bridge.ToGridString();
         }
-
+        // když je 0 tak je 1 bo navštívil konec původní pozici
         Console.WriteLine($"Tail visited: {bridge.TailEndPositions.Distinct().Count()} positions");
     }
 }
@@ -143,26 +145,82 @@ class RopeBridge
         if (!Tails.Any())
         {
             Tails.Add(previousHeadPosition);
+            TailEndPositions.Add(previousHeadPosition);
         }
-        else if (Tails.Count != TailLength)
-        {
-            Tails.Add(Tails[^1]);
-        }
-
+        var lastTail = Tails[^1];
         if (!Head.IsAdjacent(Tails[0]) || previousHeadPosition == Tails[0])
         {
+            
+            Tails[0] = Tails[0].Follow(Head);
+            for (int i = 1; i <= Tails.Count - 1; i++)
+            {
+                if (!Tails[i].IsAdjacent(Tails[i - 1]))
+                    Tails[i] = Tails[i].Follow(Tails[i - 1]);
+
+                //var str = ToGridString();
+            }
             if (Tails.Count == TailLength)
             {
                 TailEndPositions.Add(Tails[^1]);
             }
-            Tails[0] = Tails[0].Follow(Head);
-            for (int i = 1; i <= Tails.Count - 2; i++)
-            {        
-                // Follow nějak špatně funguje, když se plní itemy tak itemy na sebe nenavazují.
-                Tails[i] = Tails[i].Follow(Tails[i - 1]);
+        }
+        if (Tails.Count != TailLength && lastTail != Tails[^1])
+        {
+            Tails.Add(lastTail);
+        }
+
+        //var str2 = ToGridString();
+        Moves.Add(direction);
+    }
+
+    public string ToGridString()
+    {
+        var grid = "";
+        var all = Tails.Append(Head).Concat(TailEndPositions).ToArray();
+
+        var x = all.Select(a => a.X).ToArray();
+        var minX = x.Min();
+        var maxX = x.Max();
+
+        var y = all.Select(a => a.Y).ToArray();
+        var minY = y.Min();
+        var maxY = y.Max();
+
+        var normalizeX = minX < 0 ? minX * -1 : 0;
+        var normalizeY = minY < 0 ? minY * -1 : 0;
+
+        var xLength = maxX + normalizeX;
+        var yLength = maxY + normalizeY;
+
+        var gridList = new List<List<string>>();
+        for (int i = 0; i <= yLength; i++)
+        {
+            gridList.Add(new List<string>());
+            var item = gridList[^1];
+            for (int j = 0; j <= xLength; j++)
+            {
+                item.Add(".");
             }
         }
-        Moves.Add(direction);
+
+        
+        gridList[0 + normalizeY][0 + normalizeX] = "S";
+        for (int i = 0; i < Tails.Count ; i++)
+        {
+            gridList[Tails[i].Y + normalizeY][Tails[i].X + normalizeX] = (i + 1).ToString();
+        }
+        gridList[Head.Y + normalizeY][Head.X + normalizeX] = "H";
+
+        gridList.Reverse();
+        gridList.ForEach(row =>
+        {
+            row.ForEach(item => { grid += item; });
+            grid += Environment.NewLine;
+        });
+
+
+
+        return grid;
     }
 }
 
