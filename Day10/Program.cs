@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
+using System.Text;
 
 internal class Program
 {
@@ -19,12 +20,35 @@ internal class Program
             instuctions.Add(Instruction.Parse(line));
         }
 
-
-        var runs = new[] { 20, 60, 100, 140, 180, 220 }.Select(a => new Device(instuctions).Run(a)*a).ToList();
+        var runs = new[] { 20, 60, 100, 140, 180, 220 }.Select(a => new Device(instuctions).Run(a, null) * a).ToList();
         var sum = runs.Sum();
-
         Console.WriteLine($"Signal strength is: {sum}.");
+        Display(new Device(instuctions));
         Console.ReadLine();
+    }
+
+    static void Display(Device device)
+    {
+        var index = 0;
+        device.Run(240, (cycle, x) =>
+        {
+            if (cycle % 40 == 0 && cycle != 0)
+            {
+                index = 0;
+                Console.WriteLine();
+            }
+            
+            if (x == index || x == index - 1 || x == index + 1)
+            {
+                Console.Write("#");
+            }
+            else
+            {
+                Console.Write(".");
+            }
+            index++;
+
+        });
     }
 
 
@@ -101,12 +125,12 @@ class Device
     //    return X;
     //}
 
-    public int Run(int cycles)
+    public int Run(int cycles, Action<int, int>? action)
     {
         var runs = 0;
         var runningInstruction = NextInstructions.FirstOrDefault();
 
-        while (runs<cycles)
+        while (runs < cycles)
         {
             if (runningInstruction?.CyclesLeft == 0)
             {
@@ -121,9 +145,10 @@ class Device
                 runningInstruction.CyclesLeft--;
             }
             // during
+            if (action is not null) action(runs, X);
             runs++;
             if (runs >= cycles) break;
-        }       
+        }
         return X;
     }
 
@@ -165,6 +190,8 @@ class Device
     }
 
 }
+
+
 
 internal static class Extensions
 {
