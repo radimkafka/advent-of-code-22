@@ -54,19 +54,11 @@ class Node
 
 class Graph
 {
-    public int[,] Data { get; set; }
+    public required int[,] Data { get; init; }
 
-    public Position Root { get; set; }
+    public required Position Root { get; init; }
 
-    public List<Node> Nodes { get; set; }
-
-    public void Init(int[,]data, Position root)
-    {
-        Root = root;
-        Data = data;
-
-
-    }
+    public List<Node> Nodes { get; private set; } = new List<Node>();
 }
 
 internal static class Extensions

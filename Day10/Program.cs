@@ -1,6 +1,12 @@
-﻿using System.Net;
-using System.Net.Http.Headers;
-using System.Text;
+﻿internal interface ITestInterface
+{
+
+}
+
+internal interface AaaPterface123
+{
+
+}
 
 internal class Program
 {
@@ -13,6 +19,11 @@ internal class Program
             Console.WriteLine($"File does not exist!");
             return;
         }
+        if (File.Exists(filePath))
+        {
+            Console.WriteLine($"Aaaa!");
+        }
+
         var input = File.ReadAllLines(filePath);
         var instuctions = new List<Instruction>();
         foreach (var line in input)
@@ -20,24 +31,25 @@ internal class Program
             instuctions.Add(Instruction.Parse(line));
         }
 
-        var runs = new[] { 20, 60, 100, 140, 180, 220 }.Select(a => new Device(instuctions).Run(a, null) * a).ToList();
+        var runs = new[] { 20, 60, 100, 140, 180, 220 }.Select(a => new Device(instuctions)
+        .Run(a, null) * a).ToList();
         var sum = runs.Sum();
         Console.WriteLine($"Signal strength is: {sum}.");
         Display(new Device(instuctions));
-        Console.ReadLine();
+        _ = Console.ReadLine();
     }
 
-    static void Display(Device device)
+    private static void Display(Device device)
     {
         var index = 0;
-        device.Run(240, (cycle, x) =>
+        _ = device.Run(240, (cycle, x) =>
         {
             if (cycle % 40 == 0 && cycle != 0)
             {
                 index = 0;
                 Console.WriteLine();
             }
-            
+
             if (x == index || x == index - 1 || x == index + 1)
             {
                 Console.Write("#");
@@ -50,19 +62,16 @@ internal class Program
 
         });
     }
-
-
 }
 
-enum InstructionType
+internal enum InstructionType
 {
     None,
     NoOp,
     Addx
 }
 
-
-record Instruction(InstructionType Type, int Param)
+internal record Instruction(InstructionType Type, int Param)
 {
     public static Instruction Parse(string input)
     {
@@ -74,14 +83,16 @@ record Instruction(InstructionType Type, int Param)
             _ => InstructionType.None
         };
         var param = 0;
-        if (parts.Length > 1) int.TryParse(parts[1], out param);
+        if (parts.Length > 1)
+        {
+            _ = int.TryParse(parts[1], out param);
+        }
 
         return new(type, param);
     }
 }
 
-
-class InstructionSchedule
+internal class InstructionSchedule
 {
     public Instruction Instruction { get; private set; }
     public int CyclesLeft { get; set; }
@@ -92,7 +103,7 @@ class InstructionSchedule
     }
 }
 
-class Device
+internal class Device
 {
     public int X { get; private set; } = 1;
 
@@ -139,38 +150,36 @@ class Device
                 runningInstruction = NextInstructions[RanInstruction.Count];
             }
 
-
             if (runningInstruction is not null)
             {
                 runningInstruction.CyclesLeft--;
             }
             // during
-            if (action is not null) action(runs, X);
+            if (action is not null)
+            {
+                action(runs, X);
+            }
+
             runs++;
-            if (runs >= cycles) break;
+            if (runs >= cycles)
+            {
+                break;
+            }
         }
         return X;
     }
 
-
-    private void RunInstruction(Instruction ins)
-    {
-        AddInstruction(ins);
-        NextInstructions.ForEach(instruction => { instruction.CyclesLeft--; });
-
-        var instructionsToRun = NextInstructions.Where(a => a.CyclesLeft == 0).ToList();
-        if (instructionsToRun.Any())
-        {
-            NextInstructions = NextInstructions.Where((a) => a.CyclesLeft > 0).ToList();
-            instructionsToRun.ForEach(schedule => { ApplyInstruction(schedule.Instruction); });
-        }
-
-    }
-
     private void ApplyInstruction(Instruction? ins)
     {
-        if (ins?.Type == InstructionType.Addx) X += ins.Param;
-        RanInstruction.Add(ins);
+        if (ins?.Type == InstructionType.Addx)
+        {
+            X += ins.Param;
+        }
+
+        if (ins is not null)
+        {
+            RanInstruction.Add(ins);
+        }
     }
 
     private void AddInstruction(Instruction ins)
@@ -188,10 +197,7 @@ class Device
                 break;
         }
     }
-
 }
-
-
 
 internal static class Extensions
 {
