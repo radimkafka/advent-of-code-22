@@ -23,14 +23,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Day9", "Day9\Day9.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Day10", "Day10\Day10.csproj", "{6F2683C6-CB87-4915-84A2-FD26D4700FF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Day11", "Day11\Day11.csproj", "{B68D3266-618D-413A-9FF5-6497D0D394E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Day11", "Day11\Day11.csproj", "{B68D3266-618D-413A-9FF5-6497D0D394E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Day12", "Day12\Day12.csproj", "{89101289-523C-4D1A-9448-468F5F2DA4D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Day12", "Day12\Day12.csproj", "{89101289-523C-4D1A-9448-468F5F2DA4D1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{7274DB75-3C3E-4536-9597-7EA69A98CD8E}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Day13", "Day13\Day13.csproj", "{762408C3-713B-4880-A19D-E9666A8EE1C8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -86,6 +88,10 @@ Global
 		{89101289-523C-4D1A-9448-468F5F2DA4D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89101289-523C-4D1A-9448-468F5F2DA4D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89101289-523C-4D1A-9448-468F5F2DA4D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{762408C3-713B-4880-A19D-E9666A8EE1C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{762408C3-713B-4880-A19D-E9666A8EE1C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{762408C3-713B-4880-A19D-E9666A8EE1C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{762408C3-713B-4880-A19D-E9666A8EE1C8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
