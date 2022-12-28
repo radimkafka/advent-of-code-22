@@ -1,17 +1,11 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.IO;
-using System.Linq;
-using System.Net.Sockets;
-using System.Reflection.Metadata.Ecma335;
-
-namespace Day1
+﻿namespace Day1
 {
     class Program
     {
         static void Main(string[] args)
         {
-            var filePath = "../../../input.basic.txt";
+            //var filePath = "../../../input.basic.txt";
+            var filePath = "../../../input.txt";
             if (!File.Exists(filePath))
             {
                 Console.WriteLine($"File does not exist!");
@@ -22,107 +16,96 @@ namespace Day1
                 .Split(Environment.NewLine + Environment.NewLine)
                 .Select(a => a.Split(Environment.NewLine));
 
-            var pairs = pairsString.Select(a => new Pair(Packet.Parse(a[0]), Packet.Parse(a[1]))).ToList();
+            //var pairs = pairsString.Select(a => new Pair(Packet.Parse(a[0]), Packet.Parse(a[1]), a[0], a[1])).ToList();
+            var pairs = pairsString.Select(a => new Pair(ValueOrArray.Parse(a[0]), ValueOrArray.Parse(a[1]), a[0], a[1])).ToList();
             var sum = 0;
             for (int i = 0; i < pairs.Count; i++)
-            {               
+            {
                 // TODO Pair 7 dělá brikule - když nesedí počet zanořených kolekcí
                 if (pairs[i].IsLeftSmaller())
                 {
-                    sum += i+1;
+                    sum += i + 1;
+                    Console.WriteLine(i + 1);
                 }
             }
             //var count = pairs.Select((a, i) => a.IsLeftSmaller() ? i : 0).ToArray();
+            Console.WriteLine();
             Console.WriteLine(sum);
             Console.ReadLine();
         }
     }
 
-    record Pair(Packet Left, Packet Right)
+    record Pair(ValueOrArray Left, ValueOrArray Right, string LeftString, string RightString)
     {
         public bool IsLeftSmaller()
         {
-            for (int i = 0; i < Left.Values.Length; i++)
-            {
-                if (!Left.IsSmaller(Right, i)) return false;
-            }
-            for (int i = 0; i < Left.Children.Length; i++)
-            {
-                if (!Left.Children[i].IsSmaller(Right, i)) return false;
-            }
-            return true;
+            return Left.IsSmaller(Right);
         }
     }
 
-    record PacketValue(int Position, int Value);
-
-    class Packet
+    class ValueOrArray
     {
-        public int Position { get; set; }
+        public int? Value { get; set; }
 
-        public PacketValue[] Values { get; set; }
+        public List<ValueOrArray>? Items { get; set; }
 
-        public Packet[] Children { get; set; }
+        public bool IsValue { get; private set; }
 
-        public static Packet Parse(string input)
+        public bool IsArtificial { get; set; }
+
+        public ValueOrArray(int? value)
         {
-            var tempInput = input;
-            var parts = new List<string>();
-            while (tempInput.Contains('['))
+            Value = value;
+            IsValue = true;
+        }
+
+        public ValueOrArray(List<ValueOrArray> items, bool isArtificial = false)
+        {
+            Items = items;
+            IsArtificial = isArtificial;
+        }
+
+        public static ValueOrArray Parse(string input)
+        {
+            ValueOrArray? item;
+            if (input.StartsWith("[") && input.EndsWith("]"))
             {
-                var indexOfStart = tempInput.LastIndexOf('[');
-                var indexOfEnd = tempInput.ClosestIndexOf(']', indexOfStart) + 1;
-                parts.Add(tempInput.Substring(indexOfStart, indexOfEnd - indexOfStart));
-                tempInput = tempInput.Replace(parts.Last(), $"*{parts.Count - 1}*");
+                var list = input[1..^1].SplitGroups().Select(a => Parse(a)).ToList();
+                item = new ValueOrArray(list);
             }
-            return ParsePart(parts.Last(), parts.Take(parts.Count - 1).ToList(), 0);
-        }
-
-        public bool IsSmaller(Packet packet, int index)
-        {
-            var valueAtIndex = ValueAtIndex(index);
-            var packetValueAtIndex = packet.ValueAtIndex(index);
-
-            if (valueAtIndex > packetValueAtIndex) return false;
-            return true;
-        }
-
-        public int ValueAtIndex(int index)
-        {
-            var value = Values.FirstOrDefault(a => a.Position == index);
-            if (value != null) return value.Value;
-
-            return Children.FirstOrDefault(a => a.Position == index)?.ValueAtIndex(0) ?? -1;
-        }
-
-        private static Packet ParsePart(string input, List<string> children, int position)
-        {
-            var parts = input.Substring(1, input.Length - 2).Split(',');
-            var packet = new Packet()
+            else
             {
-                Position = position
-            };
+                item = new ValueOrArray(input.TryParseNull());
+            }
+            return item;
+        }
 
-            var values = new List<PacketValue>();
-            var childrenPackets = new List<Packet>();
-
-            for (int i = 0; i < parts.Length; i++)
+        internal bool IsSmaller(ValueOrArray right)
+        {
+            // TODO null
+            if (IsValue && right.IsValue) return Value <= right.Value;
+            if (!IsValue && !right.IsValue)
             {
-                var item = parts[i];
-                if (item.StartsWith('*'))
+                if (IsArtificial && right.Items.Count == 0) return true;
+                if (right.IsArtificial && Items.Count == 0) return true;
+                if (right.IsArtificial || IsArtificial)
                 {
-                    childrenPackets.Add(ParsePart(children[item.IndexInChildren()], children, i));
+                    return Items[0].IsSmaller(right.Items[0]);
                 }
-                else
+
+                var length = Items!.Count > right.Items!.Count ? Items.Count : right.Items.Count;
+                for (int i = 0; i < length; i++)
                 {
-                    values.Add(new(i, item.TryParse()));
+                    if (i >= Items.Count) return true;
+                    if (i >= right.Items.Count) return false;
+                    if (!Items[i].IsSmaller(right.Items[i])) return false;
                 }
+                return true;
             }
 
-            packet.Values = values.ToArray();
-            packet.Children = childrenPackets.ToArray();
+            if (IsValue) return new ValueOrArray(new List<ValueOrArray>() { this }, true).IsSmaller(right);
 
-            return packet;
+            return IsSmaller(new ValueOrArray(new List<ValueOrArray>() { right }, true));
         }
     }
 
@@ -132,6 +115,15 @@ namespace Day1
         {
             int.TryParse(input, out int result);
             return result;
+        }
+
+        public static int? TryParseNull(this string input)
+        {
+            if (int.TryParse(input, out int result))
+            {
+                return result;
+            }
+            return null;
         }
 
         public static int ClosestIndexOf(this string input, char value, int index)
@@ -148,7 +140,25 @@ namespace Day1
             return input.Replace("*", "").TryParse();
         }
 
+        public static string[] SplitGroups(this string input)
+        {
+            var nestedLevel = 0;
+            var start = 0;
+            var parts = new List<string>();
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (input[i] == '[') nestedLevel++;
+                else if (input[i] == ']') nestedLevel--;
+                else if (input[i] == ',' && nestedLevel == 0)
+                {
+                    parts.Add(input.Substring(start, i - start));
+                    start = i + 1;
+                }
+            }
+            var last = input.Substring(start);
+            if (!string.IsNullOrEmpty(last)) parts.Add(last);
 
-
+            return parts.ToArray();
+        }
     }
 }
