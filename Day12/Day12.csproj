@@ -7,8 +7,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <EditorConfigFiles Remove="C:\s\advent-of-code-22\Day10\.editorconfig" />
-  </ItemGroup>
-
 </Project>
